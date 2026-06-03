@@ -2,16 +2,28 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 int main(void){
-    const char* bin = "/bin/";
     char cmd[20] = {};
     char* args[20] = {};
+    int child_ret_status;
+    pid_t cmd_pid;
     while(1){
         printf("> ");
-        scanf("%s", cmd);
-        if(execvp(cmd, args) == -1)
+        scanf("%19s", cmd);
+        cmd_pid = fork();
+        if(cmd_pid == -1){
             perror(cmd);
+            continue;
+        }
+        if(cmd_pid != 0){
+            waitpid(cmd_pid, &child_ret_status, 0);
+            continue;
+        }
+        if(execvp(cmd, args) == -1){
+            perror(cmd);
+        }
     }
     return 0;
 }
