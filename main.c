@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/wait.h>
+#include "mylib.c"
 
 int main(void){
     char cmd[20] = {};
