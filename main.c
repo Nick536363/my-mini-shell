@@ -1,7 +1,9 @@
 #include "mylib.c"
 
-int main(void){
+int main(void)
+{
     int argc = 0;
+    char cmd[CMD_MAX] = {};
     char args_str[MAX_ARGS][MAX_STR] = {};
     char* args[MAX_ARGS] = {};
     int child_ret_status;
@@ -9,11 +11,16 @@ int main(void){
 
     for(int arg = 0; arg < MAX_ARGS; arg++)
             args[arg] = args_str[arg];
-
     while(1){
         printf("$ ");
-        for(int arg = 0; arg < MAX_ARGS; arg++){
-            scanf("%s", args[arg]);
+        memset(args_str, 0, sizeof(args_str));
+        memset(cmd, 0, sizeof(cmd));
+        fgets(cmd, CMD_MAX, stdin);
+        argc = 0;
+        for(char* space_ptr = cmd; space_ptr != NULL; space_ptr = strchr(space_ptr+1, ' ')){
+            if(strchr(space_ptr+1, ' ') != NULL) strncpy(args[argc], space_ptr, strchr(space_ptr+1, ' ') - space_ptr);
+            else strncpy(args[argc], space_ptr, cmd != space_ptr ? space_ptr - cmd : strlen(cmd)-1);
+            puts(args[argc]);
             argc++;
         }
         cmd_pid = fork();
