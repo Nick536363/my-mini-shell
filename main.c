@@ -9,7 +9,6 @@ int main(void)
     int child_ret_status;
     pid_t cmd_pid;
     int bg;
-
     for(int arg = 0; arg < MAX_ARGS; arg++)
             args[arg] = args_str[arg];
 
@@ -28,12 +27,16 @@ int main(void)
         if(cmd_pid != 0){
             if(!bg)
                 waitpid(cmd_pid, &child_ret_status, 0);
+            else
+                printf("%d - background\n", cmd_pid);
             continue;
         }
         if(execvp(args[0], args) == -1){
             perror(args[0]);
             exit(EXIT_FAILURE);
         }
+        
+        exit(EXIT_SUCCESS);
     }
     return 0;
 }
