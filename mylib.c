@@ -14,7 +14,7 @@
 
 
 int parse_args(char* cmd, char* args[])
-{
+{   
     int argc = 0;
     char* arg = strtok(cmd, " \n");
     if(arg == NULL)
@@ -29,4 +29,17 @@ int parse_args(char* cmd, char* args[])
 }
 
 
+int check_if_bg(char* args[], int argc)
+{
+    if(!strncmp(args[argc-1], "%", strlen(args[argc-1]))){
+        args[argc-1] = NULL;
+        return 1;
+    }
+    if(args[argc-1][strlen(args[argc-1])-1] == '%'){
+        args[argc-1][strlen(args[argc-1])-1] = '\0';
+        return 1;
+    }
+
+    return 0;
+}
 #endif 
