@@ -8,21 +8,25 @@ int main(void)
     char* args[MAX_ARGS] = {};
     int child_ret_status;
     pid_t cmd_pid;
-
-    for(int arg = 0; arg < MAX_ARGS; arg++)
-            args[arg] = args_str[arg];
+    char* arg;
     while(1){
         printf("$ ");
         memset(args_str, 0, sizeof(args_str));
         memset(cmd, 0, sizeof(cmd));
         fgets(cmd, CMD_MAX, stdin);
         argc = 0;
-        for(char* space_ptr = cmd; space_ptr != NULL; space_ptr = strchr(space_ptr+1, ' ')){
-            if(strchr(space_ptr+1, ' ') != NULL) strncpy(args[argc], space_ptr, strchr(space_ptr+1, ' ') - space_ptr);
-            else strncpy(args[argc], space_ptr, cmd != space_ptr ? space_ptr - cmd : strlen(cmd)-1);
-            puts(args[argc]);
-            argc++;
-        }
+        for(int arg = 0; arg < MAX_ARGS; arg++)
+            args[arg] = args_str[arg];
+        
+        arg = strtok(cmd, " \n");
+        if(arg == NULL)
+            strncpy(args[argc++], cmd, strlen(cmd));
+        else
+            while(arg != NULL){
+                strncpy(args[argc++], arg, strlen(arg));
+                arg = strtok(NULL, " \n");
+            }
+        args[argc] = NULL;
         cmd_pid = fork();
         if(cmd_pid == -1){
             perror(args[0]);
