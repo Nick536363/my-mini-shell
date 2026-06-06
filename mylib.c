@@ -12,4 +12,21 @@
 #define MAX_STR     20
 #define CMD_MAX     MAX_ARGS * MAX_STR
 
+
+int parse_args(char* cmd, char* args[])
+{
+    int argc = 0;
+    char* arg = strtok(cmd, " \n");
+    if(arg == NULL)
+        strncpy(args[argc++], cmd, strlen(cmd));
+    else
+        while(arg != NULL){
+            strncpy(args[argc++], arg, strlen(arg));
+                arg = strtok(NULL, " \n");
+        }
+    args[argc] = NULL;
+    return argc;
+}
+
+
 #endif 
