@@ -42,4 +42,29 @@ int check_if_bg(char* args[], int argc)
 
     return 0;
 }
+
+
+int check_if_pipe(char* cmd)
+{
+    char* pipe_symb = strchr(cmd, '|');
+    if(pipe_symb != NULL)
+        return 1;
+    return 0;
+}
+
+
+int parse_cmds(char* cmd, char* cmds[])
+{
+    int cmdc = 0;
+    char* current_cmd = strtok(cmd, "|");
+    if(current_cmd == NULL)
+        strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd));
+    else
+        while(current_cmd != NULL){
+            strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd));
+                current_cmd = strtok(NULL, "|\n");
+        }
+    cmds[cmdc] = NULL;
+    return cmdc;
+}
 #endif 
