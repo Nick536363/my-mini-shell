@@ -24,6 +24,9 @@ int main(void)
         memset(cmds_str, 0, sizeof(cmds_str));
         memset(cmd, 0, sizeof(cmd));
         fgets(cmd, CMD_MAX, stdin);
+        if(cmd[0] == '\n'){
+            continue;
+        }
         int is_pipe = check_if_pipe(cmd);
         if(is_pipe){
             cmdc = parse_cmds(cmd, cmds);
