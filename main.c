@@ -27,6 +27,7 @@ int main(void)
         int is_pipe = check_if_pipe(cmd);
         if(is_pipe){
             cmdc = parse_cmds(cmd, cmds);
+            pipe_exec(cmds, args, cmdc, &cmd_pid);
             continue;
         }
         argc = parse_args(cmd, args);

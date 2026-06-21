@@ -21,6 +21,9 @@ int parse_args(char* cmd, char* args[])
         strncpy(args[argc++], cmd, strlen(cmd));
     else
         while(arg != NULL){
+            if(args[argc] == NULL){
+                memset(args+argc, '\0', sizeof(NULL));
+            }
             strncpy(args[argc++], arg, strlen(arg));
                 arg = strtok(NULL, " \n");
         }
@@ -58,13 +61,46 @@ int parse_cmds(char* cmd, char* cmds[])
     int cmdc = 0;
     char* current_cmd = strtok(cmd, "|");
     if(current_cmd == NULL)
-        strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd));
+        strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd)+1);
     else
         while(current_cmd != NULL){
-            strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd));
+            strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd)+1);
                 current_cmd = strtok(NULL, "|\n");
         }
-    cmds[cmdc] = NULL;
+    
     return cmdc;
+}
+
+
+int pipe_exec(char* cmds[], char* args[], int cmdc, pid_t* cmd_pid){
+    int fd[cmdc-1][2];
+    int argc;
+
+    for(int pipec = 0; pipec < cmdc-1; pipec++)
+        pipe(fd[pipec]);
+    for(int cmd = 0; cmd < cmdc; cmd++){
+        argc = parse_args(cmds[cmd], args);
+        
+        *cmd_pid = fork();
+        
+        if(*cmd_pid == 0){
+            if(cmd == 0){
+                dup2(fd[cmd][1], 1);
+                close(fd[cmd][1]);
+            }
+            else if(cmd < cmdc-1){
+                dup2(fd[cmd-1][0], 0);
+                dup2(fd[cmd][1], 1);
+                close(fd[cmd-1][0]);
+                close(fd[cmd][1]);
+            }
+            else{
+                dup2(fd[cmd-1][0], 0);
+                close(fd[cmd-1][0]);
+            }
+            execvp(args[0], args);
+        }
+       // memset(args, 0, MAX_ARGS*MAX_STR*sizeof(char));
+    }
 }
 #endif 
