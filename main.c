@@ -4,6 +4,7 @@ int main(void)
 {
     int argc;
     int cmdc;
+    char* path = START_PATH;
     char cmd[CMD_MAX] = {};
     char args_str[MAX_ARGS][MAX_STR] = {};
     char cmds_str[MAX_ARGS][MAX_STR] = {};
@@ -16,9 +17,10 @@ int main(void)
     
     for(int current_cmd = 0; current_cmd < MAX_ARGS; current_cmd++)
             cmds[current_cmd] = cmds_str[current_cmd];
+    chdir(path);
 
     while(1){
-        printf("$ ");
+        printf("%s $ ", path);
         memset(args_str, 0, sizeof(args_str));
         memset(cmds_str, 0, sizeof(cmds_str));
         memset(cmd, 0, sizeof(cmd));
@@ -46,11 +48,19 @@ int main(void)
                 printf("[%d] %s - background\n", cmd_pid, args[0]);
             continue;
         }
+        if(strcmp("chdir", args[0]) == 0){
+            chdir(args[1]);
+            path = strdup(args[1]);
+            continue;
+        }
+        if(strcmp("exit", args[0]) == 0){
+            free(path);
+            exit(EXIT_SUCCESS);
+        }
         if(execvp(args[0], args) == -1){
             perror(args[0]);
             exit(EXIT_FAILURE);
         }
-        exit(EXIT_SUCCESS);
     }
     return 0;
 }
