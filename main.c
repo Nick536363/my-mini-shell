@@ -13,8 +13,7 @@ int main(void)
     pid_t cmd_pid;
     int bg;
     int is_pipe;
-    for(int arg = 0; arg < MAX_ARGS; arg++)
-            args[arg] = args_str[arg];
+    
     for(int current_cmd = 0; current_cmd < MAX_ARGS; current_cmd++)
             cmds[current_cmd] = cmds_str[current_cmd];
 
@@ -30,10 +29,10 @@ int main(void)
         int is_pipe = check_if_pipe(cmd);
         if(is_pipe){
             cmdc = parse_cmds(cmd, cmds);
-            pipe_exec(cmds, args, cmdc, &cmd_pid);
+            pipe_exec(cmds, args, args_str, cmdc, &cmd_pid);
             continue;
         }
-        argc = parse_args(cmd, args);
+        argc = parse_args(cmd, args, args_str);
         bg = check_if_bg(args, argc);
         cmd_pid = fork();
         if(cmd_pid == -1){

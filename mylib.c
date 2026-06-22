@@ -13,21 +13,21 @@
 #define CMD_MAX     MAX_ARGS * MAX_STR
 
 
-int parse_args(char* cmd, char* args[])
+int parse_args(char* cmd, char* args_ptrs[], char args_orig[][MAX_STR])
 {   
+    for(int arg = 0; arg < MAX_ARGS; arg++)
+            args_ptrs[arg] = args_orig[arg];
+
     int argc = 0;
     char* arg = strtok(cmd, " \n");
     if(arg == NULL)
-        strncpy(args[argc++], cmd, strlen(cmd));
+        strncpy(args_ptrs[argc++], cmd, strlen(cmd));
     else
         while(arg != NULL){
-            if(args[argc] == NULL){
-                memset(args+argc, '\0', sizeof(NULL));
-            }
-            strncpy(args[argc++], arg, strlen(arg));
+            strncpy(args_ptrs[argc++], arg, strlen(arg));
                 arg = strtok(NULL, " \n");
         }
-    args[argc] = NULL;
+    args_ptrs[argc] = NULL;
     return argc;
 }
 
@@ -72,14 +72,14 @@ int parse_cmds(char* cmd, char* cmds[])
 }
 
 
-int pipe_exec(char* cmds[], char* args[], int cmdc, pid_t* cmd_pid){
+int pipe_exec(char* cmds[], char* args[], char args_str[][MAX_STR], int cmdc, pid_t* cmd_pid){
     int fd[cmdc-1][2];
     int argc;
 
     for(int pipec = 0; pipec < cmdc-1; pipec++)
         pipe(fd[pipec]);
     for(int cmd = 0; cmd < cmdc; cmd++){
-        argc = parse_args(cmds[cmd], args);
+        argc = parse_args(cmds[cmd], args, args_str);
         
         *cmd_pid = fork();
         
