@@ -36,6 +36,11 @@ int main(void)
         }
         argc = parse_args(cmd, args, args_str);
         bg = check_if_bg(args, argc);
+        if(strcmp("chdir", args[0]) == 0){
+            chdir(args[1]);
+            path = strdup(args[1]);
+            continue;
+        }
         cmd_pid = fork();
         if(cmd_pid == -1){
             perror(args[0]);
@@ -46,11 +51,6 @@ int main(void)
                 waitpid(cmd_pid, &child_ret_status, 0);
             else
                 printf("[%d] %s - background\n", cmd_pid, args[0]);
-            continue;
-        }
-        if(strcmp("chdir", args[0]) == 0){
-            chdir(args[1]);
-            path = strdup(args[1]);
             continue;
         }
         if(strcmp("exit", args[0]) == 0){
