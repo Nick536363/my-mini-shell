@@ -61,46 +61,82 @@ int parse_cmds(char* cmd, char* cmds[])
     int cmdc = 0;
     char* current_cmd = strtok(cmd, "|");
     if(current_cmd == NULL)
-        strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd)+1);
+        strcpy(cmds[cmdc++], current_cmd);
     else
         while(current_cmd != NULL){
-            strncpy(cmds[cmdc++], current_cmd, strlen(current_cmd)+1);
-                current_cmd = strtok(NULL, "|\n");
+            strcpy(cmds[cmdc++], current_cmd);
+            current_cmd = strtok(NULL, "|\n");
         }
     
     return cmdc;
 }
 
 
-int pipe_exec(char* cmds[], char* args[], char args_str[][MAX_STR], int cmdc, pid_t* cmd_pid){
+int pipe_exec(char* cmds[], char* args[], char args_str[][MAX_STR], int cmdc){
     int fd[cmdc-1][2];
-    int argc;
-
+    int return_status;
+    pid_t cmds_pid[cmdc];
     for(int pipec = 0; pipec < cmdc-1; pipec++)
-        pipe(fd[pipec]);
-    for(int cmd = 0; cmd < cmdc; cmd++){
-        argc = parse_args(cmds[cmd], args, args_str);
-        
-        *cmd_pid = fork();
-        
-        if(*cmd_pid == 0){
-            if(cmd == 0){
-                dup2(fd[cmd][1], 1);
-                close(fd[cmd][1]);
-            }
-            else if(cmd < cmdc-1){
-                dup2(fd[cmd-1][0], 0);
-                dup2(fd[cmd][1], 1);
-                close(fd[cmd-1][0]);
-                close(fd[cmd][1]);
-            }
-            else{
-                dup2(fd[cmd-1][0], 0);
-                close(fd[cmd-1][0]);
-            }
-            execvp(args[0], args);
+        if(pipe(fd[pipec]) == -1){
+            perror("Creating pipe");
+            exit(EXIT_FAILURE);
         }
-       // memset(args, 0, MAX_ARGS*MAX_STR*sizeof(char));
+    for(int cmd = 0; cmd < cmdc; cmd++){
+        parse_args(cmds[cmd], args, args_str);
+        
+        cmds_pid[cmd] = fork();
+        if(cmds_pid[cmd] == -1){
+            perror("Creating child");
+            exit(EXIT_FAILURE);
+        }
+        
+        if(cmds_pid[cmd] == 0){
+            if(cmd == 0){
+                if(dup2(fd[cmd][1], 1) == -1){
+                    perror("Duplicate file descriptor");
+                    exit(EXIT_FAILURE);
+                }
+            }
+            
+            else if(cmd < cmdc-1){
+                if(dup2(fd[cmd-1][0], 0) == -1 || dup2(fd[cmd][1], 1) == -1){
+                    perror("Duplicate file descriptor");
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            else{
+                if(dup2(fd[cmd-1][0], 0) == -1){
+                    perror("Duplicate file descriptor");
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            for(int pipec = 0; pipec < cmdc-1; pipec++)
+                if(close(fd[pipec][0]) == -1 || close(fd[pipec][1]) == -1){
+                    perror("Closing pipe");
+                    exit(EXIT_FAILURE);
+                }
+
+            if(execvp(args[0], args) == -1){
+                perror(args[0]);
+                exit(EXIT_FAILURE);
+            }
+
+        }
+    }
+
+    for(int pipec = 0; pipec < cmdc-1; pipec++){
+        if(close(fd[pipec][0]) == -1 || close(fd[pipec][1]) == -1){
+            perror("Closing pipe");
+            exit(EXIT_FAILURE);
+        }
+    }
+    for(int cmd = 0; cmd < cmdc; cmd++){
+        if(waitpid(cmds_pid[cmd], &return_status, 0) == -1){
+            perror("Waiting for child procces");
+            exit(EXIT_FAILURE);
+        }
     }
 }
 #endif 
