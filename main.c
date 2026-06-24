@@ -4,7 +4,7 @@ int main(void)
 {
     int argc;
     int cmdc;
-    char* path = START_PATH;
+    char* path = strdup(START_PATH);
     char cmd[CMD_MAX] = {};
     char args_str[MAX_ARGS][MAX_STR] = {};
     char cmds_str[MAX_ARGS][MAX_STR] = {};
@@ -36,7 +36,8 @@ int main(void)
         }
         argc = parse_args(cmd, args, args_str);
         bg = check_if_bg(args, argc);
-        if(strcmp("chdir", args[0]) == 0){
+        if(strcmp("cd", args[0]) == 0){
+            free(path);
             chdir(args[1]);
             path = strdup(args[1]);
             continue;
