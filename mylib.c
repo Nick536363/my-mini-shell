@@ -1,5 +1,5 @@
-#ifndef __INCLUDED__
-#define __INCLUDED__
+#ifndef __IS_LIB__
+#define __IS_LIB__
 
 #include <stdio.h>
 #include <string.h>
@@ -7,11 +7,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <stdlib.h>
-
-#define MAX_ARGS    10
-#define MAX_STR     20
-#define CMD_MAX     MAX_ARGS * MAX_STR
-#define START_PATH "/home/"
+#include "mylib.h"
 
 int parse_args(char* cmd, char* args_ptrs[], char args_orig[][MAX_STR])
 {   
@@ -21,11 +17,11 @@ int parse_args(char* cmd, char* args_ptrs[], char args_orig[][MAX_STR])
     int argc = 0;
     char* arg = strtok(cmd, " \n");
     if(arg == NULL)
-        strncpy(args_ptrs[argc++], cmd, strlen(cmd));
+        strcpy(args_ptrs[argc++], cmd);
     else
         while(arg != NULL){
-            strncpy(args_ptrs[argc++], arg, strlen(arg));
-                arg = strtok(NULL, " \n");
+            strcpy(args_ptrs[argc++], arg);
+            arg = strtok(NULL, " \n");
         }
     args_ptrs[argc] = NULL;
     return argc;
@@ -49,8 +45,7 @@ int check_if_bg(char* args[], int argc)
 
 int check_if_pipe(char* cmd)
 {
-    char* pipe_symb = strchr(cmd, '|');
-    if(pipe_symb != NULL)
+    if(strchr(cmd, '|') != NULL)
         return 1;
     return 0;
 }
@@ -60,6 +55,7 @@ int parse_cmds(char* cmd, char* cmds[])
 {
     int cmdc = 0;
     char* current_cmd = strtok(cmd, "|");
+
     if(current_cmd == NULL)
         strcpy(cmds[cmdc++], current_cmd);
     else
@@ -139,4 +135,5 @@ int pipe_exec(char* cmds[], char* args[], char args_str[][MAX_STR], int cmdc){
         }
     }
 }
-#endif 
+
+#endif
