@@ -136,4 +136,28 @@ int pipe_exec(char* cmds[], char* args[], char args_str[][MAX_STR], int cmdc){
     }
 }
 
+
+int check_if_redirect(char *cmd)
+{
+    if(strchr(cmd, '<') != NULL)
+        return 1;
+    if(strchr(cmd, '>') != NULL)
+        return 2;
+    return 0;
+}
+
+
+int parse_redirect(char* cmd, int mode, char* dst[]){
+    char* token = mode == 1 ? " < " : " > ";
+    int cmdc = 0;
+    char* current_cmd = strtok(cmd, token);
+
+    while(current_cmd != NULL){
+        strcpy(dst[cmdc++], current_cmd);
+        current_cmd = strtok(NULL, token);
+    }
+    
+    return cmdc;
+
+}
 #endif

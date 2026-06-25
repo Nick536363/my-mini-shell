@@ -14,13 +14,14 @@ int main(void)
     pid_t cmd_pid;
     int bg;
     int is_pipe;
-    
+    int redirected;
+
     for(int current_cmd = 0; current_cmd < MAX_ARGS; current_cmd++)
             cmds[current_cmd] = cmds_str[current_cmd];
     chdir(path);
 
     while(1){
-        printf("%s $ ", path);
+        printf("%s λ ", path);
         memset(args_str, 0, sizeof(args_str));
         memset(cmds_str, 0, sizeof(cmds_str));
         memset(cmd, 0, sizeof(cmd));
@@ -28,10 +29,15 @@ int main(void)
         if(cmd[0] == '\n'){
             continue;
         }
-        int is_pipe = check_if_pipe(cmd);
+        is_pipe = check_if_pipe(cmd);
+        redirected = check_if_redirect(cmd);
         if(is_pipe){
             cmdc = parse_cmds(cmd, cmds);
             pipe_exec(cmds, args, args_str, cmdc);
+            continue;
+        }
+        if(redirected){
+            cmdc = parse_redirect(cmd, redirected, cmds);
             continue;
         }
         argc = parse_args(cmd, args, args_str);
@@ -56,7 +62,7 @@ int main(void)
         }
         if(strcmp("exit", args[0]) == 0){
             free(path);
-            exit(EXIT_SUCCESS);
+            
         }
         if(execvp(args[0], args) == -1){
             perror(args[0]);
