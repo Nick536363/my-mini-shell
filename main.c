@@ -38,6 +38,17 @@ int main(void)
         }
         if(redirected){
             cmdc = parse_redirect(cmd, redirected, cmds);
+            parse_args(cmds[0], args, args_str);
+            cmd_pid = fork();
+            if(cmd_pid == -1){
+                perror("Creating child procces");
+                continue;
+            }
+            if(cmd_pid == 0){
+                redirect(cmds[cmdc-1], redirected);
+                execvp(args[0], args);
+            }
+            wait(&child_ret_status);
             continue;
         }
         argc = parse_args(cmd, args, args_str);

@@ -7,7 +7,9 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include "mylib.h"
+
 
 int parse_args(char* cmd, char* args_ptrs[], char args_orig[][MAX_STR])
 {   
@@ -148,7 +150,7 @@ int check_if_redirect(char *cmd)
 
 
 int parse_redirect(char* cmd, int mode, char* dst[]){
-    char* token = mode == 1 ? " < " : " > ";
+    char* token = mode == 1 ? " < \n" : " > \n";
     int cmdc = 0;
     char* current_cmd = strtok(cmd, token);
 
@@ -159,5 +161,35 @@ int parse_redirect(char* cmd, int mode, char* dst[]){
     
     return cmdc;
 
+}
+
+
+void redirect(char* filepath, int mode)
+{
+    int fd;
+    switch(mode){
+        case 1:
+            fd = open(filepath, O_RDONLY);
+            if(fd == -1){
+                perror("Opening file");
+                exit(EXIT_FAILURE);
+            }
+            if(dup2(fd, 0) == -1){
+                perror("Redirecting data");
+                exit(EXIT_FAILURE);
+            }
+            break;
+        case 2:
+            fd = open(filepath, O_WRONLY | O_CREAT);
+            if(fd == -1){
+                perror("Opening file");
+                exit(EXIT_FAILURE);
+            }
+            if(dup2(fd, 1) == -1){
+                perror("Redirecting data");
+                exit(EXIT_FAILURE);
+            }
+            break;
+    }
 }
 #endif
