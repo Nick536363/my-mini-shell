@@ -4,7 +4,7 @@ int main(void)
 {
     int argc;
     int cmdc;
-    char* path = strdup(START_PATH);
+    char path[MAX_STR] = START_PATH;
     char cmd[CMD_MAX] = {};
     char args_str[MAX_ARGS][MAX_STR] = {};
     char cmds_str[MAX_ARGS][MAX_STR] = {};
@@ -54,9 +54,13 @@ int main(void)
         argc = parse_args(cmd, args, args_str);
         bg = check_if_bg(args, argc);
         if(strcmp("cd", args[0]) == 0){
-            free(path);
-            chdir(args[1]);
-            path = strdup(args[1]);
+            if(chdir(args[1])){
+                perror("Changing directory");
+                continue;
+            }
+            if(getcwd(path, MAX_PATH) == NULL){
+                perror("getcwd");
+            }
             continue;
         }
         cmd_pid = fork();
@@ -70,10 +74,6 @@ int main(void)
             else
                 printf("[%d] %s - background\n", cmd_pid, args[0]);
             continue;
-        }
-        if(strcmp("exit", args[0]) == 0){
-            free(path);
-            
         }
         if(execvp(args[0], args) == -1){
             perror(args[0]);
