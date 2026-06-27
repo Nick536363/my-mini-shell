@@ -180,7 +180,7 @@ void redirect(char* filepath, int mode)
             }
             break;
         case 2:
-            fd = open(filepath, O_WRONLY | O_CREAT);
+            fd = open(filepath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
             if(fd == -1){
                 perror("Opening file");
                 exit(EXIT_FAILURE);
@@ -191,5 +191,6 @@ void redirect(char* filepath, int mode)
             }
             break;
     }
+    close(fd);
 }
 #endif
