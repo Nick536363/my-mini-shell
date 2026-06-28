@@ -1,4 +1,4 @@
-# Own shell written in C
+# A simple Unix shell written in C
 
 ## About
 
